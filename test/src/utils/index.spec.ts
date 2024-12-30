@@ -1,4 +1,4 @@
-import { extractTextFromPDF, getPrompt, sendToOpenAI } from '@/utils';
+import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
 
 jest.mock('pdfjs-dist', () => {
 	const getTextContent = jest.fn(() =>
@@ -29,7 +29,7 @@ describe('utils', () => {
 		});
 	});
 
-	describe('sendToOpenAI', () => {
+	describe('sendToChatCv', () => {
 		global.fetch = jest.fn(() =>
 			Promise.resolve({
 				json: () =>
@@ -37,7 +37,7 @@ describe('utils', () => {
 			})
 		) as jest.Mock;
 		it('should return response from api', async () => {
-			const res = await sendToOpenAI('my cv content');
+			const res = await sendToChatCv('my cv content');
 			expect(res).toBe('response_from_open_ai');
 			expect(global.fetch).toHaveBeenCalled();
 		});
