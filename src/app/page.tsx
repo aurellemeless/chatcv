@@ -5,7 +5,7 @@ import { FileUploadList, FileUploadDropzone, FileUploadRoot } from '@/components
 import { Provider } from '@/components/ui/provider';
 import { Box, Card, Flex, Heading, IconButton, Input, Stack, Textarea } from '@chakra-ui/react';
 import { ProgressCircleRing, ProgressCircleRoot } from '@/components/ui/progress-circle';
-import { extractTextFromPDF, getPrompt, sendToOpenAI } from '@/utils';
+import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
 import { useFormik } from 'formik';
 import { StepperInput } from '@/components/ui/stepper-input';
 import { Field } from '@/components/ui/field';
@@ -20,7 +20,7 @@ export default function Home() {
 	const formik = useFormik({
 		initialValues: {
 			tsize: 120,
-			url: 'https://jobs.ashbyhq.com/frontcareers/1cd24cf4-b50e-44b7-9422-50b9509f46ce',
+			url: '',
 		},
 		onSubmit: (values) => {
 			console.log(JSON.stringify(values, null, 2));
@@ -31,7 +31,7 @@ export default function Home() {
 
 	const generateCover = async () => {
 		setIsloading(true);
-		const letter = await sendToOpenAI(
+		const letter = await sendToChatCv(
 			getPrompt(pdfText as string, formik.values.url, formik.values.tsize)
 		);
 		setCoverLetter(letter);
@@ -52,7 +52,7 @@ export default function Home() {
 	const copyCoverLetter = (e) => {
 		e.preventDefault();
 		navigator.clipboard.writeText(coverLetter as string);
-		console.log(' copied to clipboard !');
+		console.info('copied to clipboard !');
 	};
 
 	return (

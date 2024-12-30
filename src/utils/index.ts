@@ -18,7 +18,7 @@ export async function extractTextFromPDF(file) {
 	return text;
 }
 
-export async function sendToOpenAI(prompt: string) {
+export async function sendToChatCv(prompt: string) {
 	const response = await fetch('http://localhost:3000/api/chatcv', {
 		method: 'POST',
 		headers: {
