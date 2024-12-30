@@ -20,7 +20,7 @@ export default function Home() {
 	const formik = useFormik({
 		initialValues: {
 			tsize: 120,
-			url: 'https://jobs.ashbyhq.com/frontcareers/1cd24cf4-b50e-44b7-9422-50b9509f46ce',
+			url: '',
 		},
 		onSubmit: (values) => {
 			console.log(JSON.stringify(values, null, 2));
@@ -52,7 +52,7 @@ export default function Home() {
 	const copyCoverLetter = (e) => {
 		e.preventDefault();
 		navigator.clipboard.writeText(coverLetter as string);
-		console.log(' copied to clipboard !');
+		console.info('copied to clipboard !');
 	};
 
 	return (
