@@ -44,7 +44,11 @@ describe('utils', () => {
 	});
 	describe('getPrompt', () => {
 		it('should return prompt with replaced values', async () => {
-			const res = await getPrompt('my cv content', 'https://whatever.io', 100);
+			const res = await getPrompt({
+				cv: 'my cv content',
+				description: 'https://whatever.io',
+				maxWords: 100,
+			});
 			const expected = `Je suis à la recherche d'un emploi voici mon cv resumé en text : my cv content . 
 je veux candidater à cette offre : https://whatever.io
 propose une lettre de motivation qui me met en valeur pour le poste demandé en 100 mots`;
