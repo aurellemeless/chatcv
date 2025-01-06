@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { PROMPT_BASE, PROMPT_CV, PROMPT_URL, PROMPT_WORD_SIZE } from './constants';
+import { PROMPT_BASE, PROMPT_CV, PROMPT_DESCRIPTION, PROMPT_WORD_SIZE } from './constants';
+import { CoverPromptType } from '@/contracts/CoverPromptType';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 	'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.mjs';
@@ -38,8 +39,8 @@ export async function sendToChatCv(prompt: string) {
 	return result.choices[0].message.content;
 }
 
-export const getPrompt = (cv: string, url: string, wordsSize: number = 80) => {
+export const getPrompt = ({ cv, description, maxWords = 80 }: CoverPromptType) => {
 	return PROMPT_BASE.replace(PROMPT_CV, cv)
-		.replace(PROMPT_URL, url)
-		.replace(PROMPT_WORD_SIZE, wordsSize.toString());
+		.replace(PROMPT_DESCRIPTION, description)
+		.replace(PROMPT_WORD_SIZE, maxWords.toString());
 };
