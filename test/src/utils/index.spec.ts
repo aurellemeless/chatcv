@@ -1,4 +1,5 @@
 import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
+import { PROMPT_MATCH_BASE } from '@/utils/constants';
 
 jest.mock('pdfjs-dist', () => {
 	const getTextContent = jest.fn(() =>
@@ -37,13 +38,13 @@ describe('utils', () => {
 			})
 		) as jest.Mock;
 		it('should return response from api', async () => {
-			const res = await sendToChatCv('my cv content');
+			const res = await sendToChatCv('route', 'my cv content');
 			expect(res).toBe('response_from_open_ai');
 			expect(global.fetch).toHaveBeenCalled();
 		});
 	});
 	describe('getPrompt', () => {
-		it('should return prompt with replaced values', async () => {
+		it('should return prompt with replaced values of PROMPT_BASE as default', async () => {
 			const res = await getPrompt({
 				cv: 'my cv content',
 				description: 'https://whatever.io',
@@ -52,6 +53,20 @@ describe('utils', () => {
 			const expected = `Je suis à la recherche d'un emploi voici mon cv resumé en text : my cv content . 
 je veux candidater à cette offre : https://whatever.io
 propose une lettre de motivation qui me met en valeur pour le poste demandé en 100 mots`;
+
+			expect(res).toBe(expected);
+		});
+
+		it('should return prompt with replaced values', async () => {
+			const res = await getPrompt({
+				cv: 'my cv content',
+				description: 'https://whatever.io',
+				maxWords: 100,
+				promptBase: PROMPT_MATCH_BASE,
+			});
+			const expected = `Je suis à la recherche d'un emploi voici mon cv resumé en text : my cv content . 
+je veux candidater à cette offre : https://whatever.io quels sont les points faibles de mon cv sous forme de tirets en 100 mots,
+ ensuite exprime en pourcentage le match avec cette offre`;
 
 			expect(res).toBe(expected);
 		});

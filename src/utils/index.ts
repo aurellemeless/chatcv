@@ -1,5 +1,11 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { PROMPT_BASE, PROMPT_CV, PROMPT_DESCRIPTION, PROMPT_WORD_SIZE } from './constants';
+import {
+	CHATCV_BASE_URL,
+	PROMPT_BASE,
+	PROMPT_CV,
+	PROMPT_DESCRIPTION,
+	PROMPT_WORD_SIZE,
+} from './constants';
 import { CoverPromptType } from '@/contracts/CoverPromptType';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -19,8 +25,8 @@ export async function extractTextFromPDF(file) {
 	return text;
 }
 
-export async function sendToChatCv(prompt: string) {
-	const response = await fetch('http://localhost:3000/api/chatcv', {
+export async function sendToChatCv(route: string = 'cover', prompt: string) {
+	const response = await fetch(CHATCV_BASE_URL + route, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -39,8 +45,14 @@ export async function sendToChatCv(prompt: string) {
 	return result.choices[0].message.content;
 }
 
-export const getPrompt = ({ cv, description, maxWords = 80 }: CoverPromptType) => {
-	return PROMPT_BASE.replace(PROMPT_CV, cv)
+export const getPrompt = ({
+	cv,
+	description,
+	maxWords = 80,
+	promptBase = PROMPT_BASE,
+}: CoverPromptType) => {
+	return promptBase
+		.replace(PROMPT_CV, cv)
 		.replace(PROMPT_DESCRIPTION, description)
 		.replace(PROMPT_WORD_SIZE, maxWords.toString());
 };

@@ -1,4 +1,3 @@
-'use client';
 import { Box, Flex, Heading, Stack, Textarea } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { FileUploadDropzone, FileUploadList, FileUploadRoot } from '../file-upload';
@@ -11,6 +10,7 @@ import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
 import { Field } from '../field';
 import { selectCoverLoading } from '@/app/store';
 import { useDispatch, useSelector } from 'react-redux';
+import { PROMPT_BASE, PROMPT_MATCH_BASE } from '@/utils/constants';
 
 function CoverForm() {
 	const dispatch = useDispatch();
@@ -30,8 +30,15 @@ function CoverForm() {
 
 	const generateCover = async ({ cv, description, maxWords }: CoverPromptType) => {
 		dispatch({ payload: { isLoading: true }, type: 'cover/loading' });
-		const letter = await sendToChatCv(getPrompt({ cv, description, maxWords }));
-		dispatch({ payload: { content: letter as string }, type: 'cover/loaded' });
+		const letter = await sendToChatCv(
+			'cover',
+			getPrompt({ cv, description, maxWords, promptBase: PROMPT_BASE })
+		);
+		const match = await sendToChatCv(
+			'match',
+			getPrompt({ cv, description, maxWords: 200, promptBase: PROMPT_MATCH_BASE })
+		);
+		dispatch({ payload: { content: letter as string, match }, type: 'cover/loaded' });
 	};
 
 	const onFileAccept = async ({ files }: { files: File[] }) => {
