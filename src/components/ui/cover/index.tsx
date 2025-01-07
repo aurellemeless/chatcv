@@ -1,4 +1,3 @@
-'use client';
 import { Box, Card, IconButton, Textarea } from '@chakra-ui/react';
 import { LuCopy } from 'react-icons/lu';
 import { Toaster, toaster } from '../toaster';

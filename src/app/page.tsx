@@ -4,6 +4,7 @@ import { Provider } from '@/components/ui/provider';
 import CoverLetter from '@/components/ui/cover';
 import CoverForm from '@/components/ui/cover/coverForm';
 import { coverStore } from './store';
+import MatchOffer from '@/components/ui/match';
 
 export default function Home() {
 	return (
@@ -11,6 +12,7 @@ export default function Home() {
 			<ReduxProvider store={coverStore}>
 				<CoverForm />
 				<CoverLetter />
+				<MatchOffer />
 			</ReduxProvider>
 		</Provider>
 	);
