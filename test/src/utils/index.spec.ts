@@ -1,5 +1,5 @@
-import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
-import { PROMPT_MATCH_BASE } from '@/utils/constants';
+import { extractTextFromPDF, getData, getPrompt, sendToChatCv, storeData } from '@/utils';
+import { CHATCV_STORAGE_KEY, PROMPT_MATCH_BASE } from '@/utils/constants';
 
 jest.mock('pdfjs-dist', () => {
 	const getTextContent = jest.fn(() =>
@@ -69,6 +69,27 @@ je veux candidater à cette offre : https://whatever.io quels sont les points fa
  ensuite exprime en pourcentage le match avec cette offre`;
 
 			expect(res).toBe(expected);
+		});
+	});
+
+	describe('storeData', () => {
+		it('should set data to localStorage', () => {
+			jest.spyOn(Storage.prototype, 'setItem');
+			Storage.prototype.setItem = jest.fn();
+			const data = { content: 'content', match: 'match' };
+			const expected = JSON.stringify(data);
+			storeData(data);
+			expect(localStorage.setItem).toHaveBeenCalledWith(CHATCV_STORAGE_KEY, expected);
+		});
+	});
+
+	describe('getData', () => {
+		it('should return stored data from localStorage', () => {
+			jest.spyOn(Storage.prototype, 'getItem');
+			const data = { content: 'content', match: 'match' };
+			Storage.prototype.getItem = jest.fn(() => JSON.stringify(data));
+			expect(getData()).toEqual(data);
+			expect(localStorage.getItem).toHaveBeenCalledWith(CHATCV_STORAGE_KEY);
 		});
 	});
 });
