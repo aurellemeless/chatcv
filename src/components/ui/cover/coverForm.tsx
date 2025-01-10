@@ -8,19 +8,20 @@ import { ProgressCircleRing, ProgressCircleRoot } from '../progress-circle';
 import { CoverPromptType } from '@/contracts/CoverPromptType';
 import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
 import { Field } from '../field';
-import { selectCoverLoading } from '@/app/store';
+import { selectCoverDescription, selectCoverLoading } from '@/app/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { PROMPT_BASE, PROMPT_MATCH_BASE } from '@/utils/constants';
 
 function CoverForm() {
 	const dispatch = useDispatch();
 	const isLoading = useSelector(selectCoverLoading);
+	const storeDescription = useSelector(selectCoverDescription);
 	const [pdfText, setPdfText] = useState<string | null>(null);
 
 	const formik = useFormik({
 		initialValues: {
 			letterSize: 120,
-			description: '',
+			description: storeDescription || '',
 		},
 		onSubmit: async (values) => {
 			const { description, letterSize: maxWords } = values;
@@ -38,7 +39,7 @@ function CoverForm() {
 			'match',
 			getPrompt({ cv, description, maxWords: 200, promptBase: PROMPT_MATCH_BASE })
 		);
-		dispatch({ payload: { content: letter as string, match }, type: 'cover/loaded' });
+		dispatch({ payload: { content: letter as string, match, description }, type: 'cover/loaded' });
 	};
 
 	const onFileAccept = async ({ files }: { files: File[] }) => {

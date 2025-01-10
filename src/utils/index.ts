@@ -1,12 +1,14 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import {
 	CHATCV_BASE_URL,
+	CHATCV_STORAGE_KEY,
 	PROMPT_BASE,
 	PROMPT_CV,
 	PROMPT_DESCRIPTION,
 	PROMPT_WORD_SIZE,
 } from './constants';
 import { CoverPromptType } from '@/contracts/CoverPromptType';
+import { CoverState } from '@/app/store';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 	'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.mjs';
@@ -56,3 +58,6 @@ export const getPrompt = ({
 		.replace(PROMPT_DESCRIPTION, description)
 		.replace(PROMPT_WORD_SIZE, maxWords.toString());
 };
+export const storeData = (data: CoverState) =>
+	localStorage.setItem(CHATCV_STORAGE_KEY, JSON.stringify(data));
+export const getData = () => JSON.parse(localStorage.getItem(CHATCV_STORAGE_KEY) || '{}');
