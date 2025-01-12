@@ -9,18 +9,21 @@ import {
 } from './constants';
 import { CoverPromptType } from '@/contracts/CoverPromptType';
 import { CoverState } from '@/app/store';
+import { DocumentInitParameters, TextItem, TypedArray } from 'pdfjs-dist/types/src/display/api';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 	'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.mjs';
 
-export async function extractTextFromPDF(file) {
+export type FileType = string | string | URL | TypedArray | ArrayBuffer | DocumentInitParameters;
+
+export async function extractTextFromPDF(file: FileType) {
 	const pdf = await pdfjsLib.getDocument(file).promise;
 	let text = '';
 
 	for (let i = 1; i <= pdf.numPages; i++) {
 		const page = await pdf.getPage(i);
 		const content = await page.getTextContent();
-		const pageText = content.items.map((item) => item?.str as string).join(' ');
+		const pageText = content.items.map((item) => (item as TextItem)?.str as string).join(' ');
 		text += pageText + '\n';
 	}
 
@@ -58,6 +61,12 @@ export const getPrompt = ({
 		.replace(PROMPT_DESCRIPTION, description)
 		.replace(PROMPT_WORD_SIZE, maxWords.toString());
 };
-export const storeData = (data: CoverState) =>
-	localStorage.setItem(CHATCV_STORAGE_KEY, JSON.stringify(data));
-export const getData = () => JSON.parse(localStorage.getItem(CHATCV_STORAGE_KEY) || '{}');
+export const storeData = (data: CoverState) => {
+	if (global?.window && global?.window?.localStorage) {
+		localStorage.setItem(CHATCV_STORAGE_KEY, JSON.stringify(data));
+	}
+};
+export const getData = () =>
+	global?.window && global?.window?.localStorage
+		? JSON.parse(localStorage.getItem(CHATCV_STORAGE_KEY) || '{}')
+		: {};

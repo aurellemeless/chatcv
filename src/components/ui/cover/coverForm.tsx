@@ -46,7 +46,7 @@ function CoverForm() {
 		const [acceptedFile] = files;
 		const reader = new FileReader();
 		reader.onloadend = async () => {
-			const text = await extractTextFromPDF(reader.result);
+			const text = await extractTextFromPDF(reader.result || '');
 			setPdfText(text);
 		};
 		reader.readAsArrayBuffer(acceptedFile);
