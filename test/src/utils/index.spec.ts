@@ -91,5 +91,24 @@ je veux candidater à cette offre : https://whatever.io quels sont les points fa
 			expect(getData()).toEqual(data);
 			expect(localStorage.getItem).toHaveBeenCalledWith(CHATCV_STORAGE_KEY);
 		});
+		it('should return {} on empty localStorage', () => {
+			jest.spyOn(Storage.prototype, 'getItem');
+			const data = {};
+			Storage.prototype.getItem = jest.fn(() => JSON.stringify(data));
+			expect(getData()).toEqual(data);
+			expect(localStorage.getItem).toHaveBeenCalledWith(CHATCV_STORAGE_KEY);
+		});
+
+		it('should return {} on undefined localStorage', () => {
+			jest.spyOn(Storage.prototype, 'getItem');
+			Object.defineProperty(global, 'window', {
+				value: {},
+				writable: true,
+			});
+			const data = {};
+			Storage.prototype.getItem = jest.fn(() => JSON.stringify(data));
+			expect(getData()).toEqual(data);
+			expect(localStorage.getItem).not.toHaveBeenCalled();
+		});
 	});
 });
