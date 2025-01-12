@@ -29,3 +29,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser and enjoy 
 - Redux [Redux](https://github.com/reduxjs/redux)
 - Open API [Open AI API](https://platform.openai.com/docs/api-reference/chat)
 - Husky [Husky](https://github.com/typicode/husky)
+
+## See in demo
+
+[see on AWS with amplify ](https://main.d3m5b85norptwq.amplifyapp.com)
