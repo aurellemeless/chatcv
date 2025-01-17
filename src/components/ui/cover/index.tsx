@@ -22,7 +22,7 @@ function CoverLetter() {
 			<Toaster />
 			<Card.Root>
 				<Card.Body gap='2'>
-					<Card.Title mt='2'>cover letter</Card.Title>
+					<Card.Title mt='2'>Cover letter</Card.Title>
 					<Card.Description>
 						<IconButton onClick={copyContent} aria-label='Copy to clipboard' variant='ghost'>
 							<LuCopy />
