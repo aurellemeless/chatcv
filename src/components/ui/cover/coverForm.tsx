@@ -1,16 +1,31 @@
 import { Box, Flex, Heading, Stack, Textarea } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { FileUploadDropzone, FileUploadList, FileUploadRoot } from '../file-upload';
+import {
+	FileUploadDropzone,
+	FileUploadLabel,
+	FileUploadList,
+	FileUploadRoot,
+} from '../file-upload';
 import { StepperInput } from '../stepper-input';
 import { Button } from '../button';
 import { useState } from 'react';
 import { ProgressCircleRing, ProgressCircleRoot } from '../progress-circle';
 import { CoverPromptType } from '@/contracts/CoverPromptType';
-import { extractTextFromPDF, getPrompt, sendToChatCv } from '@/utils';
+import { callApi, extractTextFromPDF, getPrompt } from '@/utils';
 import { Field } from '../field';
 import { selectCoverDescription, selectCoverLoading } from '@/app/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { PROMPT_BASE, PROMPT_MATCH_BASE } from '@/utils/constants';
+import {
+	PROMPT_BASE,
+	PROMPT_INTERVIEW_BASE,
+	PROMPT_MATCH_BASE,
+	PROMPT_MISSING_BASE,
+} from '@/utils/constants';
+
+export interface CallApiType {
+	data: CoverPromptType;
+	action: (arg: string) => void;
+}
 
 function CoverForm() {
 	const dispatch = useDispatch();
@@ -25,21 +40,51 @@ function CoverForm() {
 		},
 		onSubmit: async (values) => {
 			const { description, letterSize: maxWords } = values;
-			await generateCover({ maxWords, description, cv: pdfText } as CoverPromptType);
+			generateCover({ maxWords, description, cv: pdfText } as CoverPromptType);
 		},
 	});
 
-	const generateCover = async ({ cv, description, maxWords }: CoverPromptType) => {
-		dispatch({ payload: { isLoading: true }, type: 'cover/loading' });
-		const letter = await sendToChatCv(
-			'cover',
-			getPrompt({ cv, description, maxWords, promptBase: PROMPT_BASE })
-		);
-		const match = await sendToChatCv(
-			'match',
-			getPrompt({ cv, description, maxWords: 200, promptBase: PROMPT_MATCH_BASE })
-		);
-		dispatch({ payload: { content: letter as string, match, description }, type: 'cover/loaded' });
+	const generateCover = ({ cv, description, maxWords }: CoverPromptType) => {
+		const data: CallApiType[] = [
+			{
+				data: { cv, description, maxWords, promptBase: PROMPT_BASE },
+				action: (a: string) =>
+					dispatch({
+						payload: { content: a },
+						type: 'cover/loaded',
+					}),
+			},
+			{
+				data: { cv, description, maxWords, promptBase: PROMPT_MATCH_BASE },
+				action: (a: string) =>
+					dispatch({
+						payload: { match: a },
+						type: 'cover/matchLoaded',
+					}),
+			},
+			{
+				data: { cv, description, maxWords, promptBase: PROMPT_MISSING_BASE },
+				action: (a: string) =>
+					dispatch({
+						payload: { missing: a },
+						type: 'cover/missingLoaded',
+					}),
+			},
+			{
+				data: { cv, description, maxWords, promptBase: PROMPT_INTERVIEW_BASE },
+				action: (a: string) =>
+					dispatch({
+						payload: { interview: a },
+						type: 'cover/interviewLoaded',
+					}),
+			},
+		];
+		dispatch({
+			payload: { isLoading: true },
+			type: 'cover/loading',
+		});
+
+		data.map(({ data, action }) => callApi('cover', getPrompt(data), action));
 	};
 
 	const onFileAccept = async ({ files }: { files: File[] }) => {
@@ -57,8 +102,9 @@ function CoverForm() {
 			<Flex gap={3} padding={4} flexDirection={'column'} alignItems={'center'}>
 				<Flex gap={2} width={'100%'} flexDirection={'column'} alignItems={'center'}>
 					<Heading marginTop={2}>Get a free cover letter</Heading>
-					<Field required label='Upload your resume' errorText='the resume is required'>
+					<Field required errorText='the resume is required'>
 						<FileUploadRoot
+							alignSelf='center'
 							required
 							onFileAccept={onFileAccept}
 							allowDrop
@@ -67,6 +113,7 @@ function CoverForm() {
 							maxFiles={1}
 							name='cv'
 						>
+							<FileUploadLabel>Upload your resume</FileUploadLabel>
 							<FileUploadDropzone
 								label='Drag and drop here to upload your resume'
 								description='.pdf, .doc, .docx, up to 5MB'
@@ -90,7 +137,7 @@ function CoverForm() {
 									placeholder='Put the job description or job url here'
 								/>
 							</Field>
-							<Field label='cover letter length in words'>
+							<Field label='Cover letter length in words'>
 								<StepperInput
 									step={20}
 									min={80}
@@ -100,9 +147,11 @@ function CoverForm() {
 									onValueChange={(e) => formik.setFieldValue('letterSize', e.value)}
 								/>
 							</Field>
-							<Button type='submit'> get a cover letter</Button>
+							<Button type='submit' disabled={isLoading}>
+								Get a cover letter
+							</Button>
 							{isLoading && (
-								<ProgressCircleRoot value={null}>
+								<ProgressCircleRoot alignSelf='center' value={null}>
 									<ProgressCircleRing />
 								</ProgressCircleRoot>
 							)}

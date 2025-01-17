@@ -1,4 +1,4 @@
-import { extractTextFromPDF, getData, getPrompt, sendToChatCv, storeData } from '@/utils';
+import { callApi, extractTextFromPDF, getData, getPrompt, storeData } from '@/utils';
 import { CHATCV_STORAGE_KEY, PROMPT_MATCH_BASE } from '@/utils/constants';
 
 jest.mock('pdfjs-dist', () => {
@@ -22,6 +22,7 @@ jest.mock('pdfjs-dist', () => {
 		}),
 	};
 });
+
 describe('utils', () => {
 	describe('extractTextFromPDF', () => {
 		it('should return file content as test', async () => {
@@ -30,17 +31,34 @@ describe('utils', () => {
 		});
 	});
 
-	describe('sendToChatCv', () => {
-		global.fetch = jest.fn(() =>
-			Promise.resolve({
+	describe('callApi', () => {
+		beforeEach(() => {
+			global.fetch = jest.fn().mockResolvedValue({
+				ok: true,
 				json: () =>
-					Promise.resolve({ choices: [{ message: { content: 'response_from_open_ai' } }] }),
-			})
-		) as jest.Mock;
+					Promise.resolve({
+						choices: [{ message: 'resolved_fetch' }],
+					}),
+			});
+		});
+		afterEach(() => {
+			jest.clearAllMocks();
+		});
 		it('should return response from api', async () => {
-			const res = await sendToChatCv('route', 'my cv content');
-			expect(res).toBe('response_from_open_ai');
+			const mockAction = jest.fn();
+			await callApi('route', 'my cv content', mockAction);
 			expect(global.fetch).toHaveBeenCalled();
+			expect(mockAction).toHaveBeenCalled();
+		});
+		it('should return response from api', async () => {
+			const mockConsole = jest.spyOn(global.console, 'error');
+			global.fetch = jest.fn().mockRejectedValue({
+				err: 'err',
+			});
+			const mockAction = jest.fn();
+			await callApi('route', 'my cv content', mockAction);
+			expect(global.fetch).toHaveBeenCalled();
+			expect(mockConsole).toHaveBeenCalled();
 		});
 	});
 	describe('getPrompt', () => {
@@ -99,13 +117,13 @@ je veux candidater à cette offre : https://whatever.io quels sont les points fa
 			expect(localStorage.getItem).toHaveBeenCalledWith(CHATCV_STORAGE_KEY);
 		});
 
-		it('should return {} on undefined localStorage', () => {
+		it('should return null on undefined localStorage', () => {
 			jest.spyOn(Storage.prototype, 'getItem');
 			Object.defineProperty(global, 'window', {
 				value: {},
 				writable: true,
 			});
-			const data = {};
+			const data = null;
 			Storage.prototype.getItem = jest.fn(() => JSON.stringify(data));
 			expect(getData()).toEqual(data);
 			expect(localStorage.getItem).not.toHaveBeenCalled();

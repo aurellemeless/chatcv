@@ -13,7 +13,6 @@ import { DocumentInitParameters, TextItem, TypedArray } from 'pdfjs-dist/types/s
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 	'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.mjs';
-
 export type FileType = string | string | URL | TypedArray | ArrayBuffer | DocumentInitParameters;
 
 export async function extractTextFromPDF(file: FileType) {
@@ -30,8 +29,8 @@ export async function extractTextFromPDF(file: FileType) {
 	return text;
 }
 
-export async function sendToChatCv(route: string = 'cover', prompt: string) {
-	const response = await fetch(CHATCV_BASE_URL + route, {
+export function callApi(route: string = 'cover', prompt: string, action: (arg: string) => void) {
+	return fetch(CHATCV_BASE_URL + route, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -44,10 +43,14 @@ export async function sendToChatCv(route: string = 'cover', prompt: string) {
 				},
 			],
 		}),
-	});
-
-	const result = await response.json();
-	return result.choices[0].message.content;
+	})
+		.then(async (res) => {
+			const content = (await res.json())?.choices[0].message.content;
+			action(content);
+		})
+		.catch((e) => {
+			console.error(e);
+		});
 }
 
 export const getPrompt = ({
@@ -69,4 +72,4 @@ export const storeData = (data: CoverState) => {
 export const getData = () =>
 	global?.window && global?.window?.localStorage
 		? JSON.parse(localStorage.getItem(CHATCV_STORAGE_KEY) || '{}')
-		: {};
+		: null;
